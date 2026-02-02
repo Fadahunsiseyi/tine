@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Will you be my Valentine?</title>
+
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg1: #ffd6e7;
+      --bg2: #ffeef6;
+      --card: #ffffffcc;
+      --yes: #ff3b7a;
+      --yesHover: #ff1f68;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      /* min-height: 100svh; */
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      font-family: system-ui, sans-serif;
+      /* overflow: hidden; */
+      padding: 16px;
+    }
+
+    /* FULL-SCREEN CONFETTI CANVAS */
+    #confettiCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .card {
+      width: min(720px, 92vw);
+      padding: 26px 22px;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border-radius: 22px;
+      text-align: center;
+      box-shadow: 0 18px 60px rgba(0,0,0,.15);
+    }
+
+    .art {
+      width: min(160px, 80vw);
+      margin: 0 auto 10px;
+      display: block;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+      border-radius: 100%;
+      object-fit: cover;
+    }
+
+    .caption {
+      margin: 8px 0 14px;
+      color: #6b6169;
+      font-size: 20px;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 12px 0 18px;
+    }
+
+    .button-zone {
+      position: relative;
+      width: min(520px, 92%);
+      height: 150px;
+      margin: 0 auto;
+      touch-action: none;
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 16px 24px;
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.14);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .12s ease, background .12s ease;
+    }
+
+    #yesBtn {
+      left: 18%;
+      background: var(--yes);
+      color: #fff;
+    }
+    #yesBtn:hover { background: var(--yesHover); }
+
+    #noBtn {
+      left: 62%;
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: .7;
+    }
+
+    .result {
+      display: none;
+      margin-top: 18px;
+      animation: pop .35s ease;
+    }
+
+    .result h2 {
+      font-size: clamp(30px, 4.5vw, 46px);
+      margin: 10px 0;
+    }
+
+    .fireworks {
+      width: min(380px, 90vw);
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* MEDIA: hero, gallery and lightbox */
+    .media-hero {
+      margin: 12px auto 18px;
+      width: min(640px, 92%);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 36px rgba(0,0,0,.12);
+      background: #000;
+    }
+
+    .media-hero video,
+    .media-hero img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+      margin: 14px auto 6px;
+      width: min(640px, 92%);
+    }
+
+    .thumb {
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+      background: #fff;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.75);
+      z-index: 10000;
+      padding: 24px;
+    }
+
+    .lightbox.show { display: flex; }
+
+    .lightbox .content {
+      max-width: 96vw;
+      max-height: 90vh;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .lightbox .close {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      background: transparent;
+      color: #fff;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <main class="card">
+
+        <h1>This Is What Trust Looks Like❤️(hope you won't injure me)</h1>
+
+       <p class="caption"><em>Moronke, You clicked the link.</em></p>
+       <p class="caption"><em>You trusted me.</em></p>
+       <p class="caption"><em>Now let me show you why that means everything.</em></p>
+    <!-- PHOTO -->
+    <img class="art" src="assets/young.jpeg" alt="Your special moment">
+     
+    <h1>Before The World Knew You… You Were Already Magic</h1>
+    <p class="caption"><em>This is where the story begins.</em></p>
+    <p class="caption"><em>Before the glow-up.</em></p>
+    <p class="caption"><em>Before the confidence</em></p>
+    <p class="caption"><em>Before you unknowingly became someone’s answered prayer.</em></p>
+
+    <h1>This Website Has Only One Mission ❤️</h1>
+
+        <p class="caption"><em>This isn’t just a gallery.</em></p>
+        <p class="caption"><em>It’s a timeline.</em></p>
+        <p class="caption"><em>A soft archive of memories.</em></p>
+        <p class="caption"><em>A reminder of how lucky I am…</em></p>
+        <p class="caption"><em>and where my heart has been heading.</em></p>
+
+    <!-- HERO MEDIA: video prefers, image fallback -->
+    <div class="media-hero" aria-hidden="false">
+      <video id="heroVideo" playsinline muted loop preload="metadata" poster="assets/babe.mp4">
+        <source src="assets/babe.mp4" type="video/mp4">
+        <!-- fallback image -->
+        <img src="assets/babe.jpeg" alt="Hero image">
+      </video>
+    </div>
+
+    <h1>This Smile Deserves Its Own Museum ❤️</h1>
+
+     <p class="caption"><em>Every time you blush like this,</em></p>
+     <p class="caption"><em>my heart forgets how to behave.</em></p>
+     <p class="caption"><em>If happiness had a face…</em></p>
+     <p class="caption"><em>it would look like you.</em></p>
+
+    <!-- GALLERY: add more .thumb blocks as you add assets -->
+    <section class="gallery" id="gallery">
+      <div class="thumb" data-type="image" data-src="assets/babe.jpeg">
+        <img src="assets/babe.jpeg" alt="Photo 1">
+      </div>
+      <div class="thumb" data-type="image" data-src="assets/us.jpeg">
+        <img src="assets/rac.jpg" alt="Photo 1">
+      </div>
+    </section>
+
+    <h1>Beauty. Brains. Glasses. Unfair Advantage.</h1>
+
+     <p class="caption"><em>Soft. Intelligent. Stunning.</em></p>
+     <p class="caption"><em>You are the kind of woman</em></p>
+     <p class="caption"><em>who makes effort feel effortless</em></p>
+     <p class="caption"><em>and love feel easy.</em></p>
+
+     <h1>My Favorite Person ❤️</h1>
+
+      <p class="caption"><em>Even though I won’t be physically with you on Valentine’s Day,</em></p>
+      <p class="caption"><em>because I’ll be attending a friend’s induction</em></p>
+      <p class="caption"><em>please know this:</em></p>
+      <p class="caption"><em>My heart is still with you.</em></p>
+      <p class="caption"><em>Fully present.</em></p>
+      <p class="caption"><em>Fully yours.</em></p>
+      <p class="caption"><em>Distance won’t reduce what I feel.</em></p>
+      <p class="caption"><em>If anything, it proves how deeply I carry you with me.</em></p>
+
+      <h1>You Trusted Me… And I’ll Never Take That Lightly ❤️</h1>
+
+      <p class="caption"><em>Earlier, I joked about taking your money.</em></p>
+      <p class="caption"><em>But the truth is…</em></p>
+      <p class="caption"><em>The only thing I ever want from you</em></p>
+      <p class="caption"><em>is your smile,</em></p>
+      <p class="caption"><em>your heart,</em></p>
+      <p class="caption"><em>your heart,</em></p>
+      <p class="caption"><em>and your trust.</em></p>
+      <p class="caption"><em>Everything else I could ever want</em></p>
+
+
+
+    <h1>"RACHAEL"! Yes, I called you that! Will you be my valentine? Now and Always?</h1>
+
+    <section class="button-zone" id="zone">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </section>
+
+    <!-- HINT -->
+    <div class="hint" id="hint">“No” seems a bit shy 😈</div>
+
+    <section class="result" id="result">
+         🎉🎉🎉🎉🎉🎉🎉🎉🎉
+      <h1>I promise to make this Valentine’s ❤️❤️❤️ <br>
+and every day after❤️❤️ <br>
+ soft, safe, and unforgettable. ❤️❤️🎉</h1>
+      <img
+        class="fireworks"
+        src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmRyOW5lMXg4ZzlzbzBncmc2cGE2d3YzMHF1Y2lkNnVtbTU1MGNkYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/f8PCl7yWubGcc3mcUm/giphy.gif"
+        alt="Fireworks"
+      />
+    </section>
+  </main>
+
+  <script>
+    const zone = document.getElementById("zone");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const result = document.getElementById("result");
+    const hint = document.getElementById("hint");
+
+    /* ---------- CONFETTI ---------- */
+    const confettiCanvas = document.getElementById("confettiCanvas");
+
+    function resizeConfettiCanvas() {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
+      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+      confettiCanvas.style.width = "100vw";
+      confettiCanvas.style.height = "100vh";
+    }
+
+    resizeConfettiCanvas();
+    window.addEventListener("resize", resizeConfettiCanvas);
+    window.addEventListener("orientationchange", () => setTimeout(resizeConfettiCanvas, 150));
+
+    const confettiInstance = confetti.create(confettiCanvas, {
+      resize: false,
+      useWorker: true
+    });
+
+    function fullScreenConfetti() {
+      const end = Date.now() + 1600;
+
+      (function frame() {
+        confettiInstance({
+          particleCount: 12,
+          spread: 90,
+          startVelocity: 45,
+          ticks: 180,
+          origin: { x: Math.random(), y: Math.random() * 0.3 }
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+
+      setTimeout(() => {
+        confettiInstance({
+          particleCount: 300,
+          spread: 140,
+          startVelocity: 60,
+          ticks: 220,
+          origin: { x: 0.5, y: 0.55 }
+        });
+      }, 300);
+    }
+
+    /* ---------- YES BUTTON GROWS ---------- */
+    let yesScale = 1;
+    function growYes() {
+      yesScale = Math.min(2.2, yesScale + 0.1);
+      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+    }
+
+    /* ---------- NO BUTTON RUNS AWAY ---------- */
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function moveNo(px, py) {
+      const z = zone.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      let dx = (b.left + b.width / 2) - px;
+      let dy = (b.top + b.height / 2) - py;
+      let mag = Math.hypot(dx, dy) || 1;
+      dx /= mag;
+      dy /= mag;
+
+      let newLeft = (b.left - z.left) + dx * 150;
+      let newTop  = (b.top - z.top) + dy * 150;
+
+      newLeft = clamp(newLeft, 0, z.width - b.width);
+      newTop  = clamp(newTop, 0, z.height - b.height);
+
+      noBtn.style.left = newLeft + "px";
+      noBtn.style.top = newTop + "px";
+      noBtn.style.transform = "none";
+
+      growYes();
+    }
+
+    zone.addEventListener("pointermove", e => {
+      const b = noBtn.getBoundingClientRect();
+      const d = Math.hypot(
+        (b.left + b.width / 2) - e.clientX,
+        (b.top + b.height / 2) - e.clientY
+      );
+      if (d < 140) moveNo(e.clientX, e.clientY);
+    });
+
+    noBtn.addEventListener("click", e => e.preventDefault());
+
+    /* ---------- YES CLICK ---------- */
+    yesBtn.addEventListener("click", () => {
+      zone.style.display = "none";
+      hint.style.display = "none";     // HIDE THE HINT
+      result.style.display = "block";
+      resizeConfettiCanvas();
+      fullScreenConfetti();
+    });
+
+    /* ---------- HERO AUTO-PLAY (muted) ---------- */
+    const heroVideo = document.getElementById('heroVideo');
+    if (heroVideo) {
+      heroVideo.muted = true;
+      heroVideo.loop = true;
+      heroVideo.playsInline = true;
+      heroVideo.play().catch(() => {
+        // autoplay may be blocked; show poster image instead
+      });
+      // tap to toggle mute/play on mobile
+      heroVideo.addEventListener('click', () => {
+        if (heroVideo.paused) heroVideo.play();
+        else heroVideo.pause();
+      });
+    }
+
+    /* ---------- LIGHTBOX / GALLERY ---------- */
+    function createLightbox() {
+      const lb = document.createElement('div');
+      lb.id = 'lightbox';
+      lb.className = 'lightbox';
+      lb.setAttribute('aria-hidden', 'true');
+      lb.innerHTML = `
+        <button class="close" aria-label="Close">×</button>
+        <div class="content"></div>
+      `;
+      document.body.appendChild(lb);
+      return lb;
+    }
+
+    const lightbox = createLightbox();
+    const lbClose = lightbox.querySelector('.close');
+    const lbContent = lightbox.querySelector('.content');
+
+    function openLightboxFor(el) {
+      const type = el.dataset.type || 'image';
+      const src = el.dataset.src;
+      const poster = el.dataset.poster;
+      lbContent.innerHTML = '';
+      if (type === 'video') {
+        const v = document.createElement('video');
+        v.src = src;
+        v.controls = true;
+        v.autoplay = true;
+        v.playsInline = true;
+        if (poster) v.poster = poster;
+        v.style.maxWidth = '96vw';
+        v.style.maxHeight = '90vh';
+        lbContent.appendChild(v);
+      } else {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = el.querySelector('img')?.alt || '';
+        img.style.maxWidth = '96vw';
+        img.style.maxHeight = '90vh';
+        lbContent.appendChild(img);
+      }
+      lightbox.classList.add('show');
+      lightbox.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('show');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lbContent.innerHTML = '';
+    }
+
+    const gallery = document.getElementById('gallery');
+    if (gallery) {
+      gallery.addEventListener('click', (e) => {
+        const t = e.target.closest('.thumb');
+        if (!t) return;
+        openLightboxFor(t);
+      });
+    }
+
+    lbClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+  </script>
+</body>
+</html>
+
+
+
