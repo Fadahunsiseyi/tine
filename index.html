@@ -10,8 +10,8 @@
 
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
+      --bg1: #C8A2C8;
+      --bg2: #a552a8;
       --card: #ffffffcc;
       --yes: #ff3b7a;
       --yesHover: #ff1f68;
@@ -216,6 +216,13 @@
 
   <main class="card">
 
+<audio id="bg-music" loop>
+  <source src="assets/temi.mp3" type="audio/mpeg">
+</audio>
+
+
+<h3 id="enter-btn">Moronke, Kindly <a href="#">click here</a> so you lisen while you read through 💖</h3>
+
         <h1>This Is What Trust Looks Like❤️(hope you won't injure me)</h1>
 
        <p class="caption"><em>Moronke, You clicked the link.</em></p>
@@ -319,6 +326,19 @@ and every day after❤️❤️ <br>
   </main>
 
   <script>
+
+  const button = document.getElementById("enter-btn");
+
+  button.addEventListener("click", async () => {
+    const music = document.getElementById("bg-music");
+
+    try {
+      await music.play();
+      console.log("Music started successfully");
+    } catch (err) {
+      console.log("Chrome blocked playback:", err);
+    }
+  });
     const zone = document.getElementById("zone");
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
